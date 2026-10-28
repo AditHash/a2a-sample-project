@@ -25,6 +25,38 @@ Bug Solution Service (port 8002)
 
 **The inter-agent call is real A2A**, not a custom `POST /solve` API. The triage service makes the remote call deterministically so you can observe it on every request. Later, replace this fixed handoff with a LangChain tool that the model selects.
 
+## Run with three scripts
+
+The repository includes these **top-level entry points** (verified on `main`):
+
+| Script | Runs | Port |
+| --- | --- | --- |
+| `solution-agent.py` | Solution A2A server | 8002 |
+| `triage-agent.py` | Triage A2A server | 8001 |
+| `main.py` | CLI A2A client | none |
+
+Run `uv sync` and configure `.env` first. Then open three terminals in the repository root and run, in order:
+
+```bash
+uv run solution-agent.py
+```
+
+```bash
+uv run triage-agent.py
+```
+
+```bash
+uv run main.py
+```
+
+The main CLI also accepts a bug description, for example:
+
+```bash
+uv run main.py "FastAPI returns 500 when email is missing"
+```
+
+If you cloned the repository before the new scripts were added, run `git pull origin main`. If GitHub shows an older version, make sure you're viewing the `main` branch.
+
 ## Requirements
 
 - Python 3.12+
@@ -53,31 +85,7 @@ Copy-Item .env.example .env
 
 Fill in `OPENAI_API_KEY`. Do not commit your `.env`.
 
-### Quick start: three simple commands
-
-Start the **Solution Agent** in the first terminal:
-
-```bash
-uv run solution-agent.py
-```
-
-Start the **Triage Agent** in a second terminal:
-
-```bash
-uv run triage-agent.py
-```
-
-Run the **client** in a third terminal:
-
-```bash
-uv run main.py "FastAPI returns HTTP 500 when email is missing"
-```
-
-Calling `uv run main.py` without arguments uses a default sample bug.
-
-The module-based commands below are also supported.
-
-### Start three terminals in the repository folder
+### Alternative: run with Python modules
 
 **Terminal 1 — Solution Agent:**
 
