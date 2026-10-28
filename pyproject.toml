@@ -9,6 +9,7 @@ dependencies = [
     "langchain>=1.0,<2.0",
     "langchain-openai>=1.0,<2.0",
     "python-dotenv>=1.0",
+    "sse-starlette>=2.3.6",
     "starlette>=0.46",
     "uvicorn>=0.34",
 ]
