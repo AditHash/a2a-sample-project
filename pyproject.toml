@@ -1,0 +1,21 @@
+[project]
+name = "devdesk-a2a"
+version = "0.1.0"
+description = "Learn A2A with two independent LangChain agents"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "a2a-sdk==1.1.0",
+    "langchain>=1.0,<2.0",
+    "langchain-openai>=1.0,<2.0",
+    "python-dotenv>=1.0",
+    "starlette>=0.46",
+    "uvicorn>=0.34",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["devdesk"]
