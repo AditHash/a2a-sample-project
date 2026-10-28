@@ -53,6 +53,30 @@ Copy-Item .env.example .env
 
 Fill in `OPENAI_API_KEY`. Do not commit your `.env`.
 
+### Quick start: three simple commands
+
+Start the **Solution Agent** in the first terminal:
+
+```bash
+uv run solution-agent.py
+```
+
+Start the **Triage Agent** in a second terminal:
+
+```bash
+uv run triage-agent.py
+```
+
+Run the **client** in a third terminal:
+
+```bash
+uv run main.py "FastAPI returns HTTP 500 when email is missing"
+```
+
+Calling `uv run main.py` without arguments uses a default sample bug.
+
+The module-based commands below are also supported.
+
 ### Start three terminals in the repository folder
 
 **Terminal 1 — Solution Agent:**
