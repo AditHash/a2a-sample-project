@@ -25,38 +25,6 @@ Bug Solution Service (port 8002)
 
 **The inter-agent call is real A2A**, not a custom `POST /solve` API. The triage service makes the remote call deterministically so you can observe it on every request. Later, replace this fixed handoff with a LangChain tool that the model selects.
 
-## Run with three scripts
-
-The repository includes these **top-level entry points** (verified on `main`):
-
-| Script | Runs | Port |
-| --- | --- | --- |
-| `solution-agent.py` | Solution A2A server | 8002 |
-| `triage-agent.py` | Triage A2A server | 8001 |
-| `main.py` | CLI A2A client | none |
-
-Run `uv sync` and configure `.env` first. Then open three terminals in the repository root and run, in order:
-
-```bash
-uv run solution-agent.py
-```
-
-```bash
-uv run triage-agent.py
-```
-
-```bash
-uv run main.py
-```
-
-The main CLI also accepts a bug description, for example:
-
-```bash
-uv run main.py "FastAPI returns 500 when email is missing"
-```
-
-If you cloned the repository before the new scripts were added, run `git pull origin main`. If GitHub shows an older version, make sure you're viewing the `main` branch.
-
 ## Requirements
 
 - Python 3.12+
@@ -85,27 +53,32 @@ Copy-Item .env.example .env
 
 Fill in `OPENAI_API_KEY`. Do not commit your `.env`.
 
-### Alternative: run with Python modules
+All three scripts use `python-dotenv` and `load_dotenv()` to read the `.env`
+beside the scripts. Existing environment variables take precedence over `.env`.
 
-**Terminal 1 — Solution Agent:**
+### Quick start: three simple commands
 
-```bash
-uv run python -m devdesk.server --role solution
-```
-
-**Terminal 2 — Triage Agent:**
+Start the **Solution Agent** in the first terminal:
 
 ```bash
-uv run python -m devdesk.server --role triage
+uv run solution-agent.py
 ```
 
-**Terminal 3 — Client:**
+Start the **Triage Agent** in a second terminal:
 
 ```bash
-uv run python -m devdesk.cli "FastAPI returns HTTP 500 when email is missing"
+uv run triage-agent.py
 ```
 
-The CLI sends an A2A request to the triage service, which calls the solution service over A2A, then prints both agents' answers.
+Run the **client** in a third terminal:
+
+```bash
+uv run main.py "FastAPI returns HTTP 500 when email is missing"
+```
+
+Calling `uv run main.py` without arguments uses a default sample bug.
+
+The CLI sends an A2A request to the triage service, which calls the solution service over A2A, then prints both agents' answers. Each A2A call allows up to five minutes waiting for a response, since model generation can take time.
 
 Inspect the agent cards:
 
@@ -114,15 +87,26 @@ Inspect the agent cards:
 
 To prove remote A2A is required, stop the Solution Agent and try the CLI again. The triage task should fail. Restart it and retry.
 
+## Following the logs
+
+Restart both agent scripts after code changes. All three terminals show timestamped
+logs by default. The CLI shows discovery, sending, and total time. The triage
+terminal shows model generation, the A2A handoff, and combining the report. The
+solution terminal shows generating the fix and returning it. Task logs show task
+IDs, WORKING/COMPLETED/FAILED states, and publishing the final artifact.
+
+Each model call reports its duration; a `waiting for response` message means it is
+still generating. Logs include text lengths rather than full prompts or answers.
+For additional application debug messages, set `LOG_LEVEL=DEBUG` in `.env` and
+restart the scripts. Logs go to stderr; the final report goes to stdout.
+
 ## File guide
 
 | Path | Responsibility |
 | --- | --- |
-| `devdesk/agents.py` | Two ordinary LangChain `create_agent` definitions |
-| `devdesk/executor.py` | Bridges A2A tasks and LangChain; calls remote service |
-| `devdesk/remote.py` | A2A Agent Card discovery and message sending |
-| `devdesk/server.py` | Exposes each agent as a standalone A2A server |
-| `devdesk/cli.py` | CLI A2A client |
+| `main.py` | CLI client and shared A2A discovery, server, and task handling |
+| `triage-agent.py` | LangChain triage agent and A2A handoff to the solution agent |
+| `solution-agent.py` | LangChain solution agent that proposes fixes and tests |
 
 ## What you'll learn
 
